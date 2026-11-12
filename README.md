@@ -33,7 +33,7 @@
 ## 快速开始（Python）
 
 ```bash
-git clone https://github.com/xiasi0/wyoming-sherpa-onnx.git
+git clone https://github.com/duanyudan86/wyoming-sherpa-onnx.git
 cd wyoming-sherpa-onnx
 python3 -m venv .venv
 source .venv/bin/activate
@@ -52,7 +52,7 @@ python run_server.py --hotwords "儿童房,台灯"
 ## 快速开始（Docker）
 
 ```bash
-git clone https://github.com/xiasi0/wyoming-sherpa-onnx.git
+git clone https://github.com/duanyudan86/wyoming-sherpa-onnx.git
 cd wyoming-sherpa-onnx
 docker compose up -d --build
 docker compose logs -f

@@ -29,7 +29,7 @@ Offline ASR server based on the Wyoming protocol, currently focused on Qwen3-ASR
 ## Quick Start (Python)
 
 ```bash
-git clone https://github.com/xiasi0/wyoming-sherpa-onnx.git
+git clone https://github.com/duanyudan86/wyoming-sherpa-onnx.git
 cd wyoming-sherpa-onnx
 python3 -m venv .venv
 source .venv/bin/activate
@@ -48,7 +48,7 @@ python run_server.py --hotwords "kids-room,light"
 ## Quick Start (Docker)
 
 ```bash
-git clone https://github.com/xiasi0/wyoming-sherpa-onnx.git
+git clone https://github.com/duanyudan86/wyoming-sherpa-onnx.git
 cd wyoming-sherpa-onnx
 docker compose up -d --build
 docker compose logs -f
