@@ -77,7 +77,10 @@ def select_model_profile_key(model_dir: Path, model_name: str = "") -> str:
     return "0.6b"
 
 
-def get_model_hint_url() -> str:
+def get_model_hint_url(model_name: str = "") -> str:
+    from . import fourier
+    if model_name == fourier.MODEL:
+        return f"https://huggingface.co/{fourier.REPO}"
     return MODEL_REPO_PAGE
 
 
@@ -184,6 +187,9 @@ def download_model(
     model_name: str = "",
 ) -> Path:
     """Download only required files for the selected Qwen3-ASR model profile."""
+    from . import fourier
+    if model_name == fourier.MODEL:
+        return fourier.download(model_dir)
     profile_key = select_model_profile_key(model_dir=model_dir, model_name=model_name)
     profile_subdir = MODEL_PROFILES[profile_key]
     model_path = model_dir.resolve()

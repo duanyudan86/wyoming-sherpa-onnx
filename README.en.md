@@ -151,3 +151,9 @@ Important:
 - ModelScope Qwen3-ASR ONNX: https://www.modelscope.cn/models/zengshuishui/Qwen3-ASR-onnx/files
 - WeSpeaker: https://github.com/wenet-e2e/wespeaker
 - 3D-Speaker: https://github.com/modelscope/3D-Speaker
+
+## Optional English Fourier model
+
+`python run_server.py --model-name oruk-fourier-2b --no-denoise --no-speaker-gate` downloads the pinned 2.41 GB INT8 export from [Oruk](https://huggingface.co/oruk/oruk-fourier-2b). The service advertises English under the selected model name. To run offline after the initial setup, add `--no-auto-download`. To use an existing model, point `--model-dir` at the extracted directory containing all three ONNX graphs, both external weight files and the tokenizer.
+
+In Home Assistant, add the **Wyoming Protocol** integration using the host running this service and port **10300**, then select its English speech-to-text model in a voice assistant. The weights are CC BY-NC 4.0 with attribution. Oruk requires separate permission for hosted/API serving or commercial deployment.

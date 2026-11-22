@@ -29,6 +29,9 @@ def _model_dir_from_name(model_name: str) -> Path:
     """Resolve default model directory from sherpa-onnx model name."""
     normalized = model_name.lower()
 
+    from . import fourier
+    if normalized == fourier.MODEL:
+        return _default_models_root() / fourier.MODEL
     if "sherpa-onnx-qwen3-asr-1.7b-int8" in normalized:
         return _default_models_root() / "sherpa-onnx-qwen3-asr-1.7B-int8"
     return _default_models_root() / "sherpa-onnx-qwen3-asr-0.6B-int8"
@@ -147,6 +150,11 @@ def parse_args() -> AppConfig:
         "--model-name",
         default=_env_str("MODEL_NAME", "sherpa-onnx-qwen3-asr-0.6B-int8"),
         help="Model name exposed in Wyoming info.",
+    )
+    parser.add_argument(
+        "--model-dir",
+        type=Path,
+        help="Use a local model directory instead of the model-name default.",
     )
     parser.add_argument(
         "--sample-rate",
@@ -284,7 +292,7 @@ def parse_args() -> AppConfig:
     if args.no_denoise:
         denoise_enabled = False
 
-    model_dir = _model_dir_from_name(args.model_name).resolve()
+    model_dir = (args.model_dir or _model_dir_from_name(args.model_name)).expanduser().resolve()
 
     speaker_reference_value = str(args.speaker_reference_wavs or "").strip()
     if speaker_reference_value:
