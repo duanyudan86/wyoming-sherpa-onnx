@@ -115,7 +115,8 @@ async def main() -> None:
         logger.info("Model verified: %s", cfg.model_dir)
 
     speaker_model_path = cfg.speaker_model_dir / cfg.speaker_model_file
-    if not check_speaker_model_exists(speaker_model_path):
+    prepare_speaker_model = cfg.speaker_gate or cfg.model_name != fourier.MODEL
+    if prepare_speaker_model and not check_speaker_model_exists(speaker_model_path):
         if cfg.auto_download:
             logger.info("Speaker model not found, starting auto-download...")
             try:
