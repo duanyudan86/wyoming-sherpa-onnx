@@ -83,7 +83,14 @@ async def main() -> None:
         get_speaker_model_hint_url,
     )
 
-    if not check_model_exists(cfg.model_dir):
+    from app import fourier
+    if cfg.model_name == fourier.MODEL:
+        if fourier.complete(cfg.model_dir / fourier.SUBDIRECTORY):
+            cfg.model_dir = cfg.model_dir / fourier.SUBDIRECTORY
+        model_ready = fourier.complete(cfg.model_dir)
+    else:
+        model_ready = check_model_exists(cfg.model_dir)
+    if not model_ready:
         if cfg.auto_download:
             logger.info("Model not found, starting auto-download...")
             try:
@@ -95,20 +102,21 @@ async def main() -> None:
                 cfg.model_dir = model_path
             except Exception as exc:
                 logger.error("Failed to download model: %s", exc)
-                logger.error("Please download model manually from:\n%s", get_model_hint_url())
+                logger.error("Please download model manually from:\n%s", get_model_hint_url(cfg.model_name))
                 sys.exit(1)
         else:
             logger.error("Qwen3-ASR model directory is invalid: %s", cfg.model_dir)
             logger.error(
                 "The directory must contain ONNX model files and a tokenizer/tokens file."
             )
-            logger.error("Download URL:\n%s", get_model_hint_url())
+            logger.error("Download URL:\n%s", get_model_hint_url(cfg.model_name))
             sys.exit(1)
     else:
         logger.info("Model verified: %s", cfg.model_dir)
 
     speaker_model_path = cfg.speaker_model_dir / cfg.speaker_model_file
-    if not check_speaker_model_exists(speaker_model_path):
+    prepare_speaker_model = cfg.speaker_gate or cfg.model_name != fourier.MODEL
+    if prepare_speaker_model and not check_speaker_model_exists(speaker_model_path):
         if cfg.auto_download:
             logger.info("Speaker model not found, starting auto-download...")
             try:

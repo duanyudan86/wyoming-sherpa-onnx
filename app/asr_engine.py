@@ -10,10 +10,7 @@ import numpy as np
 import sherpa_onnx
 
 LOGGER = logging.getLogger("wyoming-sherpa-onnx")
-_SCAFFOLD_PREFIX_RE = re.compile(
-    r"^\s*(?:language\s+\S+\s*)?<asr_text>\s*",
-    flags=re.IGNORECASE,
-)
+_TRANSCRIPT_MARKER_RE = re.compile(r"<asr_text>", flags=re.IGNORECASE)
 _DUPLICATED_PHRASE_RE = re.compile(r"(.{2,8})\1")
 _SENTENCE_RE = re.compile(r"[^。！？!?]+[。！？!?]?")
 
@@ -37,11 +34,13 @@ class Qwen3AsrEngine:
         sample_rate: int,
         num_threads: int,
         hotwords: str = "",
+        preserve_repetitions: bool = False,
     ) -> None:
         self.model_dir = model_dir
         self.sample_rate = sample_rate
         self.num_threads = num_threads
         self.hotwords = hotwords.strip()
+        self.preserve_repetitions = preserve_repetitions
         self.recognizer = self._build_recognizer()
         hotwords_count = len([x for x in self.hotwords.split(",") if x.strip()])
         LOGGER.debug(
@@ -148,7 +147,10 @@ class Qwen3AsrEngine:
         return ""
 
     def _sanitize_text(self, text: str) -> str:
-        cleaned = _SCAFFOLD_PREFIX_RE.sub("", text or "").strip()
+        # sherpa may return the raw Qwen language header before this delimiter.
+        cleaned = _TRANSCRIPT_MARKER_RE.split(text or "", maxsplit=1)[-1].strip()
+        if self.preserve_repetitions:
+            return cleaned
         # Collapse accidental repeated phrases caused by segmented decoding.
         for _ in range(2):
             next_cleaned = _DUPLICATED_PHRASE_RE.sub(r"\1", cleaned)

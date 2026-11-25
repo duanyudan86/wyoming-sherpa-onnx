@@ -8,6 +8,7 @@ from typing import Any
 
 import numpy as np
 
+from . import fourier
 from .asr_engine import AudioFormat, Qwen3AsrEngine
 from .config import AppConfig
 from .denoise import GtcrnEnhancer
@@ -61,6 +62,7 @@ class WyomingAsrServer:
             sample_rate=cfg.sample_rate,
             num_threads=cfg.num_threads,
             hotwords=cfg.hotwords,
+            preserve_repetitions=(cfg.model_name == fourier.MODEL),
         )
         self.speaker_gate: SpeakerGate | None = None
         if cfg.speaker_gate:
@@ -115,6 +117,14 @@ class WyomingAsrServer:
                 if msg.msg_type == "describe":
                     await write_message(writer, "info", self._get_info())
                 elif msg.msg_type == "transcribe":
+                    language = data.get("language")
+                    if self.cfg.model_name == fourier.MODEL and language:
+                        if language.lower().replace("_", "-").split("-")[0] != "en":
+                            await write_message(writer, "error", {
+                                "code": "unsupported-language",
+                                "text": "Fourier supports English.",
+                            })
+                            return
                     state.transcribe_opts = data
                 elif msg.msg_type == "audio-start":
                     state.stream = self.engine.create_stream()
@@ -229,7 +239,7 @@ class WyomingAsrServer:
                         "transcript",
                         {
                             "text": text,
-                            "language": state.transcribe_opts.get("language", "zh"),
+                            "language": "en" if self.cfg.model_name == fourier.MODEL else state.transcribe_opts.get("language", "zh"),
                         },
                     )
                     LOGGER.debug("[%s] Sent transcript: %r", peer, text)
@@ -281,16 +291,22 @@ class WyomingAsrServer:
                             "url": "https://github.com/k2-fsa/sherpa-onnx",
                         },
                         "installed": True,
+                        "description": "Local speech recognition via sherpa-onnx",
+                        "version": None,
                         "models": [
                             {
                                 "name": self.cfg.model_name,
-                                "languages": ["zh", "en"],
+                                "languages": ["en"] if self.cfg.model_name == fourier.MODEL else ["zh", "en"],
                                 "attribution": {
+                                    "name": "Oruk",
+                                    "url": f"https://huggingface.co/{fourier.REPO}",
+                                } if self.cfg.model_name == fourier.MODEL else {
                                     "name": "k2-fsa/sherpa-onnx",
                                     "url": "https://github.com/k2-fsa/sherpa-onnx",
                                 },
                                 "installed": True,
                                 "description": "Qwen3-ASR via sherpa-onnx",
+                                "version": None,
                             }
                         ],
                         "supports_transcript_streaming": False,

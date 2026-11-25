@@ -166,3 +166,9 @@ ASR / 声纹 / 降噪三类模型采用统一逻辑：
 - ModelScope Qwen3-ASR ONNX: https://www.modelscope.cn/models/zengshuishui/Qwen3-ASR-onnx/files
 - WeSpeaker: https://github.com/wenet-e2e/wespeaker
 - 3D-Speaker: https://github.com/modelscope/3D-Speaker
+
+## 可选的英语 Fourier 模型
+
+运行 `python run_server.py --model-name oruk-fourier-2b --no-denoise --no-speaker-gate` 可从 [Oruk](https://huggingface.co/oruk/oruk-fourier-2b) 下载指定版本的 2.41 GB INT8 模型。完成首次设置后，可添加 `--no-auto-download` 离线运行。已有模型时，可用 `--model-dir` 指定含三个 ONNX 文件、两个外部权重文件和 tokenizer 的目录。
+
+在 Home Assistant 中添加 **Wyoming Protocol** 集成，输入此服务所在主机的地址和端口 **10300**，并在语音助手中选择此英语模型。模型权重使用 CC BY-NC 4.0 许可证，需署名；托管、API 服务或商业部署需另获 Oruk 授权。
